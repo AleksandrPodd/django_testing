@@ -41,8 +41,7 @@ def test_pages_response_status(url, user, expected_status):
 
 
 @pytest.mark.parametrize(
-        'url, expected_url',
-        (
+        'url, expected_url', (
             (COMMENT_EDIT_URL, REDIRECT_EDIT_URL),
             (COMMENT_DELETE_URL, REDIRECT_DELETE_URL)
         )

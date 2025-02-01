@@ -31,8 +31,7 @@ def test_user_can_create_comment(
 
 
 @pytest.mark.parametrize(
-        'form_data',
-        (
+        'form_data', (
             pytest.lazy_fixture('form_data_bad_word_one'),
             pytest.lazy_fixture('form_data_bad_word_two')
         )
