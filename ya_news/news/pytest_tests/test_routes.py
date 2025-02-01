@@ -41,10 +41,11 @@ def test_pages_response_status(url, user, expected_status):
 
 
 @pytest.mark.parametrize(
-        'url, expected_url', (
-            (COMMENT_EDIT_URL, REDIRECT_EDIT_URL),
-            (COMMENT_DELETE_URL, REDIRECT_DELETE_URL)
-        )
+    'url, expected_url',
+    (
+        (COMMENT_EDIT_URL, REDIRECT_EDIT_URL),
+        (COMMENT_DELETE_URL, REDIRECT_DELETE_URL)
+    )
 )
 def test_edit_pages_for_anonymous_user(client, url, expected_url, comment):
     """Правка комментариев анонимным пользователем."""

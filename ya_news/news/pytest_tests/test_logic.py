@@ -31,10 +31,11 @@ def test_user_can_create_comment(
 
 
 @pytest.mark.parametrize(
-        'form_data', (
-            pytest.lazy_fixture('form_data_bad_word_one'),
-            pytest.lazy_fixture('form_data_bad_word_two')
-        )
+    'form_data',
+    (
+        pytest.lazy_fixture('form_data_bad_word_one'),
+        pytest.lazy_fixture('form_data_bad_word_two')
+    )
 )
 def test_user_cant_use_bad_words(author_client, news, news_detail, form_data):
     """Проверка блокировки запрещенных слов."""
