@@ -12,8 +12,10 @@ class TestCreateNotePage(BaseTestClass):
 
     def test_notes_list_for_author(self):
         """Проверка наличия заметки в списке заметок автора заметки."""
-        note = self.auth_author.get(
-            NOTES_LIST_URL).context['object_list'].get(id=self.note.id)
+        notes = self.auth_author.get(
+            NOTES_LIST_URL).context['object_list']
+        self.assertIn(self.note, notes)
+        note = notes.get(id=self.note.id)
         self.assertEqual(note.title, self.note.title)
         self.assertEqual(note.text, self.note.text)
         self.assertEqual(note.slug, self.note.slug)

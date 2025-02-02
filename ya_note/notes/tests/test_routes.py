@@ -45,10 +45,10 @@ class TestRoutes(BaseTestClass):
     def test_availability_for_all_users(self):
         """Проверка всех кодов возврата."""
         sessions = (
-            (HOME_URL, self.guest, HTTPStatus.OK),
-            (LOGIN_URL, self.guest, HTTPStatus.OK),
-            (LOGOUT_URL, self.guest, HTTPStatus.OK),
-            (SIGN_UP_URL, self.guest, HTTPStatus.OK),
+            (HOME_URL, self.client, HTTPStatus.OK),
+            (LOGIN_URL, self.client, HTTPStatus.OK),
+            (LOGOUT_URL, self.client, HTTPStatus.OK),
+            (SIGN_UP_URL, self.client, HTTPStatus.OK),
             (NOTE_EDIT_URL, self.auth_author, HTTPStatus.OK),
             (NOTE_DELETE_URL, self.auth_author, HTTPStatus.OK),
             (NOTE_DETAIL_URL, self.auth_author, HTTPStatus.OK),
@@ -58,12 +58,12 @@ class TestRoutes(BaseTestClass):
             (SUCCESS_URL, self.auth_author, HTTPStatus.OK),
             (NOTES_LIST_URL, self.auth_author, HTTPStatus.OK),
             (NOTE_ADD_URL, self.auth_author, HTTPStatus.OK),
-            (NOTE_EDIT_URL, self.guest, HTTPStatus.FOUND),
-            (NOTE_DELETE_URL, self.guest, HTTPStatus.FOUND),
-            (NOTE_DETAIL_URL, self.guest, HTTPStatus.FOUND),
-            (SUCCESS_URL, self.guest, HTTPStatus.FOUND),
-            (NOTES_LIST_URL, self.guest, HTTPStatus.FOUND),
-            (NOTE_ADD_URL, self.guest, HTTPStatus.FOUND)
+            (NOTE_EDIT_URL, self.client, HTTPStatus.FOUND),
+            (NOTE_DELETE_URL, self.client, HTTPStatus.FOUND),
+            (NOTE_DETAIL_URL, self.client, HTTPStatus.FOUND),
+            (SUCCESS_URL, self.client, HTTPStatus.FOUND),
+            (NOTES_LIST_URL, self.client, HTTPStatus.FOUND),
+            (NOTE_ADD_URL, self.client, HTTPStatus.FOUND)
         )
         for url, user, status in sessions:
             with self.subTest(url=url, user=user, status=status):

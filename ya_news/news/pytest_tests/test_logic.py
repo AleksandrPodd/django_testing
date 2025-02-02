@@ -11,6 +11,7 @@ from news.models import Comment
 
 pytestmark = pytest.mark.django_db
 FORM_DATA = {'text': 'Измененный комментарий'}
+BAD_WORDS_COLLECTION = ({'text': bad_word} for bad_word in BAD_WORDS)
 
 
 def test_anonymous_user_cant_create_comment(
@@ -23,19 +24,17 @@ def test_anonymous_user_cant_create_comment(
 def test_user_can_create_comment(
         author, author_client, news, news_detail, news_detail_redirect):
     """Авторизованнй пользователь может отправить комментарий."""
-    initial_comments_count = Comment.objects.count()
+    Comment.objects.all().delete()
     response = author_client.post(news_detail, data=FORM_DATA)
     assertRedirects(response, news_detail_redirect)
-    assert Comment.objects.count() - initial_comments_count == 1
-    comment = Comment.objects.latest('id')
+    assert Comment.objects.count() == 1
+    comment = Comment.objects.get()
     assert comment.text == FORM_DATA['text']
     assert comment.news == news
     assert comment.author == author
 
 
-@pytest.mark.parametrize(
-    'form_data', ({'text': bad_word} for bad_word in BAD_WORDS)
-)
+@pytest.mark.parametrize('form_data', BAD_WORDS_COLLECTION)
 def test_user_cant_use_bad_words(author_client, news, news_detail, form_data):
     """Проверка блокировки запрещенных слов."""
     initial_comments_count = Comment.objects.all()
@@ -44,7 +43,8 @@ def test_user_cant_use_bad_words(author_client, news, news_detail, form_data):
         data=form_data
     )
     assertFormError(response, form='form', field='text', errors=WARNING)
-    assertQuerysetEqual(initial_comments_count, Comment.objects.all())
+    assertQuerysetEqual(
+        initial_comments_count, Comment.objects.all(), transform=lambda x: x)
 
 
 def test_author_can_delete_comment(
@@ -63,6 +63,7 @@ def test_user_cant_delete_comment(
     """Пользователь не может удалить чужой комментарий."""
     initial_comments_count = Comment.objects.count()
     response = not_author_client.delete(news_comment_delete)
+    assert Comment.objects.filter(id=comment.id).exists()
     test_comment = Comment.objects.get(id=comment.id)
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert Comment.objects.count() == initial_comments_count

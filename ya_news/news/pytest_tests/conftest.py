@@ -51,14 +51,14 @@ def news():
 def news_set():
     """Набор новостей на главную страницу."""
     today = datetime.today()
-    News.objects.bulk_create([
+    News.objects.bulk_create(
         News(
             title=f'Новость {index}',
             text='Просто текст.',
             date=today - timedelta(days=index)
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ])
+    )
 
 
 @pytest.fixture

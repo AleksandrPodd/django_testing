@@ -19,13 +19,13 @@ SUCCESS_URL = reverse('notes:success')
 NOTE_DETAIL_URL = reverse('notes:detail', args=(SLUG,))
 NOTE_EDIT_URL = reverse('notes:edit', args=(SLUG,))
 NOTE_DELETE_URL = reverse('notes:delete', args=(SLUG,))
-REDIRECT_URL = reverse('users:login') + '?next='
-NOTE_EDIT_REDIRECT_URL = REDIRECT_URL + NOTE_EDIT_URL
-NOTE_DELETE_REDIRECT_URL = REDIRECT_URL + NOTE_DELETE_URL
-NOTE_DETAIL_REDIRECT_URL = REDIRECT_URL + NOTE_DETAIL_URL
-SUCCESS_REDIRECT_URL = REDIRECT_URL + SUCCESS_URL
-NOTES_LIST_REDIRECT_URL = REDIRECT_URL + NOTES_LIST_URL
-NOTE_ADD_REDIRECT_URL = REDIRECT_URL + NOTE_ADD_URL
+REDIRECT_EXPRESSION = reverse('users:login') + '?next='
+NOTE_EDIT_REDIRECT_URL = REDIRECT_EXPRESSION + NOTE_EDIT_URL
+NOTE_DELETE_REDIRECT_URL = REDIRECT_EXPRESSION + NOTE_DELETE_URL
+NOTE_DETAIL_REDIRECT_URL = REDIRECT_EXPRESSION + NOTE_DETAIL_URL
+SUCCESS_REDIRECT_URL = REDIRECT_EXPRESSION + SUCCESS_URL
+NOTES_LIST_REDIRECT_URL = REDIRECT_EXPRESSION + NOTES_LIST_URL
+NOTE_ADD_REDIRECT_URL = REDIRECT_EXPRESSION + NOTE_ADD_URL
 
 
 class BaseTestClass(TestCase):
@@ -43,9 +43,12 @@ class BaseTestClass(TestCase):
         cls.auth_author.force_login(cls.author)
         cls.auth_not_author = Client()
         cls.auth_not_author.force_login(cls.not_author)
-        cls.guest = Client()
         cls.form_data = {
             'title': 'Заголовок',
             'text': 'Текст',
             'slug': 'post_2'
+        }
+        cls.form_data_without_slug = {
+            'title': 'Заголовок',
+            'text': 'Текст',
         }
