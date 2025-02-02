@@ -32,8 +32,7 @@ def test_comments_order(comments_set, news, client, news_detail):
 
 def test_anonymous_client_has_no_form(client, news, news_detail):
     """Анонимному пользователю недоступна форма отправки комментария."""
-    response = client.get(news_detail)
-    assert 'form' not in response.context
+    assert 'form' not in client.get(news_detail).context
 
 
 def test_authorized_client_has_form(author_client, news, news_detail):

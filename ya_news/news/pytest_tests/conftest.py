@@ -7,7 +7,6 @@ from django.urls import reverse
 from django.utils import timezone
 import pytest
 
-from news.forms import BAD_WORDS
 from news.models import Comment, News
 
 
@@ -52,15 +51,14 @@ def news():
 def news_set():
     """Набор новостей на главную страницу."""
     today = datetime.today()
-    all_news = [
+    News.objects.bulk_create([
         News(
             title=f'Новость {index}',
             text='Просто текст.',
             date=today - timedelta(days=index)
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ]
-    return News.objects.bulk_create(all_news)
+    ])
 
 
 @pytest.fixture
@@ -83,24 +81,6 @@ def comments_set(author, news):
         )
         comment.created = now + timedelta(days=index)
         comment.save()
-
-
-@pytest.fixture
-def form_data():
-    """Данные для изменения комментария."""
-    return {'text': 'Измененный комментарий'}
-
-
-@pytest.fixture
-def form_data_bad_word_one():
-    """Данные для изменения комментария."""
-    return {'text': BAD_WORDS[0]}
-
-
-@pytest.fixture
-def form_data_bad_word_two():
-    """Данные для изменения комментария."""
-    return {'text': BAD_WORDS[1]}
 
 
 @pytest.fixture
@@ -134,9 +114,21 @@ def news_detail(news):
 
 
 @pytest.fixture
+def news_detail_redirect(news_detail):
+    """Redirect to news detail page."""
+    return f'{news_detail}#comments'
+
+
+@pytest.fixture
 def news_comment_edit(comment):
     """News comment edit page."""
     return reverse('news:edit', args=(comment.id,))
+
+
+@pytest.fixture
+def redirect_edit_comment(news_comment_edit, login):
+    """Redirect comment edit page."""
+    return f'{login}?next={news_comment_edit}'
 
 
 @pytest.fixture
@@ -146,14 +138,6 @@ def news_comment_delete(comment):
 
 
 @pytest.fixture
-def redirect_edit_comment(comment, login):
-    """Redirect comment edit page."""
-    url = reverse('news:edit', args=(comment.id,))
-    return f'{login}?next={url}'
-
-
-@pytest.fixture
-def redirect_delete_comment(comment, login):
+def redirect_delete_comment(news_comment_delete, login):
     """Redirect comment delete page."""
-    url = reverse('news:delete', args=(comment.id,))
-    return f'{login}?next={url}'
+    return f'{login}?next={news_comment_delete}'

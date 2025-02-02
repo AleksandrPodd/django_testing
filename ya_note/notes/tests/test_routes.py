@@ -15,7 +15,12 @@ from .utils import (
     NOTE_DETAIL_URL,
     NOTE_EDIT_URL,
     NOTE_DELETE_URL,
-    REDIRECT_URL,
+    NOTE_EDIT_REDIRECT_URL,
+    NOTE_DELETE_REDIRECT_URL,
+    NOTE_DETAIL_REDIRECT_URL,
+    SUCCESS_REDIRECT_URL,
+    NOTES_LIST_REDIRECT_URL,
+    NOTE_ADD_REDIRECT_URL
 )
 
 User = get_user_model()
@@ -26,16 +31,16 @@ class TestRoutes(BaseTestClass):
 
     def test_redirect_for_anonymous_client(self):
         """Редирект анонимных пользователей."""
-        for url in (
-            NOTE_EDIT_URL,
-            NOTE_DELETE_URL,
-            NOTE_DETAIL_URL,
-            SUCCESS_URL,
-            NOTES_LIST_URL,
-            NOTE_ADD_URL
+        for url, redirect_url in (
+            (NOTE_EDIT_URL, NOTE_EDIT_REDIRECT_URL),
+            (NOTE_DELETE_URL, NOTE_DELETE_REDIRECT_URL),
+            (NOTE_DETAIL_URL, NOTE_DETAIL_REDIRECT_URL),
+            (SUCCESS_URL, SUCCESS_REDIRECT_URL),
+            (NOTES_LIST_URL, NOTES_LIST_REDIRECT_URL),
+            (NOTE_ADD_URL, NOTE_ADD_REDIRECT_URL)
         ):
-            with self.subTest(url=url):
-                self.assertRedirects(self.client.get(url), REDIRECT_URL + url)
+            with self.subTest(url=url, redirect_url=redirect_url):
+                self.assertRedirects(self.client.get(url), redirect_url)
 
     def test_availability_for_all_users(self):
         """Проверка всех кодов возврата."""
@@ -44,16 +49,21 @@ class TestRoutes(BaseTestClass):
             (LOGIN_URL, self.guest, HTTPStatus.OK),
             (LOGOUT_URL, self.guest, HTTPStatus.OK),
             (SIGN_UP_URL, self.guest, HTTPStatus.OK),
-            (NOTE_EDIT_URL, self.auth_author1, HTTPStatus.OK),
-            (NOTE_DELETE_URL, self.auth_author1, HTTPStatus.OK),
-            (NOTE_DETAIL_URL, self.auth_author1, HTTPStatus.OK),
-            (NOTE_EDIT_URL, self.auth_author2, HTTPStatus.NOT_FOUND),
-            (NOTE_DELETE_URL, self.auth_author2, HTTPStatus.NOT_FOUND),
-            (NOTE_DETAIL_URL, self.auth_author2, HTTPStatus.NOT_FOUND),
-            (SUCCESS_URL, self.auth_author1, HTTPStatus.OK),
-            (NOTES_LIST_URL, self.auth_author1, HTTPStatus.OK),
-            (NOTE_ADD_URL, self.auth_author1, HTTPStatus.OK),
-
+            (NOTE_EDIT_URL, self.auth_author, HTTPStatus.OK),
+            (NOTE_DELETE_URL, self.auth_author, HTTPStatus.OK),
+            (NOTE_DETAIL_URL, self.auth_author, HTTPStatus.OK),
+            (NOTE_EDIT_URL, self.auth_not_author, HTTPStatus.NOT_FOUND),
+            (NOTE_DELETE_URL, self.auth_not_author, HTTPStatus.NOT_FOUND),
+            (NOTE_DETAIL_URL, self.auth_not_author, HTTPStatus.NOT_FOUND),
+            (SUCCESS_URL, self.auth_author, HTTPStatus.OK),
+            (NOTES_LIST_URL, self.auth_author, HTTPStatus.OK),
+            (NOTE_ADD_URL, self.auth_author, HTTPStatus.OK),
+            (NOTE_EDIT_URL, self.guest, HTTPStatus.FOUND),
+            (NOTE_DELETE_URL, self.guest, HTTPStatus.FOUND),
+            (NOTE_DETAIL_URL, self.guest, HTTPStatus.FOUND),
+            (SUCCESS_URL, self.guest, HTTPStatus.FOUND),
+            (NOTES_LIST_URL, self.guest, HTTPStatus.FOUND),
+            (NOTE_ADD_URL, self.guest, HTTPStatus.FOUND)
         )
         for url, user, status in sessions:
             with self.subTest(url=url, user=user, status=status):

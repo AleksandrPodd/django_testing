@@ -19,7 +19,13 @@ SUCCESS_URL = reverse('notes:success')
 NOTE_DETAIL_URL = reverse('notes:detail', args=(SLUG,))
 NOTE_EDIT_URL = reverse('notes:edit', args=(SLUG,))
 NOTE_DELETE_URL = reverse('notes:delete', args=(SLUG,))
-REDIRECT_URL = f'{LOGIN_URL}?next='
+REDIRECT_URL = reverse('users:login') + '?next='
+NOTE_EDIT_REDIRECT_URL = REDIRECT_URL + NOTE_EDIT_URL
+NOTE_DELETE_REDIRECT_URL = REDIRECT_URL + NOTE_DELETE_URL
+NOTE_DETAIL_REDIRECT_URL = REDIRECT_URL + NOTE_DETAIL_URL
+SUCCESS_REDIRECT_URL = REDIRECT_URL + SUCCESS_URL
+NOTES_LIST_REDIRECT_URL = REDIRECT_URL + NOTES_LIST_URL
+NOTE_ADD_REDIRECT_URL = REDIRECT_URL + NOTE_ADD_URL
 
 
 class BaseTestClass(TestCase):
@@ -28,15 +34,15 @@ class BaseTestClass(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Фикстуры."""
-        cls.author1 = User.objects.create(username='Пользователь 1')
-        cls.author2 = User.objects.create(username='Пользователь 2')
+        cls.author = User.objects.create(username='Пользователь Автор')
+        cls.not_author = User.objects.create(username='Пользователь Не Автор')
         cls.note = Note.objects.create(
-            title='Название', text='Слова', author=cls.author1, slug='post_1'
+            title='Название', text='Слова', author=cls.author, slug='post_1'
         )
-        cls.auth_author1 = Client()
-        cls.auth_author1.force_login(cls.author1)
-        cls.auth_author2 = Client()
-        cls.auth_author2.force_login(cls.author2)
+        cls.auth_author = Client()
+        cls.auth_author.force_login(cls.author)
+        cls.auth_not_author = Client()
+        cls.auth_not_author.force_login(cls.not_author)
         cls.guest = Client()
         cls.form_data = {
             'title': 'Заголовок',
