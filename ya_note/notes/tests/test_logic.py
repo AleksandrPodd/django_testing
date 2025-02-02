@@ -17,29 +17,37 @@ from .utils import (
 class TestNote(BaseTestClass):
     """Проверка создания, удаления и правки заметок."""
 
+    def can_create_note_check(self, is_slug=True):
+        """Базовый метод для проверки создания заметок."""
+        form_data = self.form_data
+        if not is_slug:
+            form_data.pop('slug')
+        Note.objects.all().delete()
+        response = self.auth_author.post(NOTE_ADD_URL, data=form_data)
+        self.assertRedirects(response, SUCCESS_URL)
+        self.assertEqual(Note.objects.count(), 1)
+        if 'slug' not in form_data.keys():
+            form_data['slug'] = slugify(form_data['title'])
+        note = Note.objects.get()
+        self.assertEqual(note.title, form_data['title'])
+        self.assertEqual(note.text, form_data['text'])
+        self.assertEqual(note.slug, form_data['slug'])
+        self.assertEqual(note.author, self.author)
+
     def test_anonymous_user_cant_create_note(self):
         """Анонимный пользователь не может создать заметку."""
-        notes_initial = Note.objects.all()
+        notes = Note.objects.all()
         self.client.post(NOTE_ADD_URL, data=self.form_data)
         self.assertQuerysetEqual(
-            Note.objects.all(), notes_initial, transform=lambda x: x)
+            Note.objects.all().order_by('id'), notes.order_by('id'))
 
     def test_user_can_create_note(self):
         """Пользователь может создать заметку."""
-        forms = (self.form_data, self.form_data_without_slug)
-        for form_data in forms:
-            with self.subTest(form_data=form_data):
-                Note.objects.all().delete()
-                response = self.auth_author.post(NOTE_ADD_URL, data=form_data)
-                self.assertRedirects(response, SUCCESS_URL)
-                self.assertEqual(Note.objects.count(), 1)
-                if 'slug' not in form_data.keys():
-                    form_data['slug'] = slugify(form_data['title'])
-                note = Note.objects.get()
-                self.assertEqual(note.title, form_data['title'])
-                self.assertEqual(note.text, form_data['text'])
-                self.assertEqual(note.slug, form_data['slug'])
-                self.assertEqual(note.author, self.author)
+        self.can_create_note_check()
+
+    def test_user_can_create_note_without_slug(self):
+        """Пользователь может создать заметку без указания слага."""
+        self.can_create_note_check(is_slug=False)
 
     def test_not_unique_slug(self):
         """Невозможность создать две заметки с одинаковым slug."""
@@ -51,7 +59,7 @@ class TestNote(BaseTestClass):
             response, 'form', 'slug', errors=(self.note.slug + WARNING)
         )
         self.assertQuerysetEqual(
-            Note.objects.all(), notes_initial, transform=lambda x: x)
+            Note.objects.all().order_by('id'), notes_initial.order_by('id'))
 
     def test_author_can_delete_note(self):
         """Автор может удалить свою заметку."""
@@ -67,7 +75,8 @@ class TestNote(BaseTestClass):
         notes_count_initial = Note.objects.count()
         self.assertEqual(self.auth_not_author.delete(
             NOTE_DELETE_URL).status_code, HTTPStatus.NOT_FOUND)
-        self.assertIn(self.note, Note.objects.all())
+        self.assertTrue(
+            self.note, Note.objects.filter(id=self.note.id).exists())
         note = Note.objects.get(id=self.note.id)
         self.assertEqual(Note.objects.count(), notes_count_initial)
         self.assertEqual(note.slug, self.note.slug)

@@ -11,7 +11,7 @@ from news.models import Comment
 
 pytestmark = pytest.mark.django_db
 FORM_DATA = {'text': 'Измененный комментарий'}
-BAD_WORDS_COLLECTION = ({'text': bad_word} for bad_word in BAD_WORDS)
+BAD_WORDS_COLLECTION = [{'text': bad_word} for bad_word in BAD_WORDS]
 
 
 def test_anonymous_user_cant_create_comment(
@@ -37,14 +37,14 @@ def test_user_can_create_comment(
 @pytest.mark.parametrize('form_data', BAD_WORDS_COLLECTION)
 def test_user_cant_use_bad_words(author_client, news, news_detail, form_data):
     """Проверка блокировки запрещенных слов."""
-    initial_comments_count = Comment.objects.all()
+    initial_comments = Comment.objects.all()
     response = author_client.post(
         news_detail,
         data=form_data
     )
     assertFormError(response, form='form', field='text', errors=WARNING)
     assertQuerysetEqual(
-        initial_comments_count, Comment.objects.all(), transform=lambda x: x)
+        initial_comments.order_by('id'), Comment.objects.all().order_by('id'))
 
 
 def test_author_can_delete_comment(
